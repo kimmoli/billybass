@@ -21,7 +21,6 @@ BuildRequires:  pkgconfig(Qt5Qml)
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(sailfishapp) >= 0.0.10
 BuildRequires:  desktop-file-utils
-Provides: libespeak.so.1.1.48
 
 %description
 Big Mouth Billy Bass

@@ -6,11 +6,13 @@ VERSION = 1.1.48
 include(../common.pri)
 
 DEFINES += "PATH_ESPEAK_DATA=\\\"$${DATADIR}\\\""
-DEFINES += USE_PORTAUDIO
+DEFINES += USE_PULSEAUDIO
 
 message($${DEFINES})
 
 INCLUDEPATH += src
+
+QMAKE_POST_LINK += $$PWD/libcopy.sh $$OUT_PWD lib$${TARGET} $${VERSION}
 
 HEADERS += src/debug.h \
            src/espeak_command.h \
@@ -130,5 +132,6 @@ OTHER_FILES += \
     espeak-data/vi_dict \
     espeak-data/zh_dict \
     espeak-data/zhy_dict \
-    espeak-data/phondata-manifest
+    espeak-data/phondata-manifest \
+    libcopy.sh
 
