@@ -36,20 +36,38 @@ Page
             spacing: Theme.paddingLarge
             PageHeader
             {
-                title: "Billybass"
+                title: "Billy Bass"
             }
             Label
             {
                 x: Theme.paddingLarge
-                text: "Hello you"
+                text: "Big Mouth"
                 color: Theme.primaryColor
                 font.pixelSize: Theme.fontSizeExtraLarge
             }
+            Label
+            {
+                text: libespeakVersion
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+            TextField
+            {
+                id: textfield
+                focus: false
+                width: parent.width
+                label: "Sano jotain"
+                font.pixelSize: Theme.fontSizeExtraLarge
+                color: Theme.primaryColor
+                placeholderText: "kirjoita tähän"
+                EnterKey.iconSource: "image://theme/icon-m-enter-accept"
+                EnterKey.onClicked: espeak.synth(text)
+            }
+
             Button
             {
-                text: "test"
+                text: "sano ny"
                 anchors.horizontalCenter: parent.horizontalCenter
-                onClicked: espeak.test()
+                onClicked: espeak.synth(textfield.text)
             }
         }
     }

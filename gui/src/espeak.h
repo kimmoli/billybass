@@ -5,7 +5,9 @@
 #ifndef ESPEAK_H
 #define ESPEAK_H
 #include <QObject>
-
+extern "C" {
+#include "speak_lib.h"
+}
 class Espeak : public QObject
 {
     Q_OBJECT
@@ -17,7 +19,8 @@ public:
 
     QString readVersion();
     //Q_INVOKABLE void setLanguage(QString lang);
-    Q_INVOKABLE void test();
+    Q_INVOKABLE QString libVersion();
+    Q_INVOKABLE void synth(QString text);
 
 signals:
     void versionChanged();

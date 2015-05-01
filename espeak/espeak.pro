@@ -7,6 +7,11 @@ include(../common.pri)
 
 DEFINES += "PATH_ESPEAK_DATA=\\\"$${DATADIR}\\\""
 DEFINES += USE_PULSEAUDIO
+DEFINES += USE_ASYNC
+DEFINES += DEBUG_ENABLED
+
+CONFIG += link_pkgconfig
+PKGCONFIG += libpulse
 
 message($${DEFINES})
 
@@ -53,7 +58,7 @@ SOURCES += src/speak_lib.cpp \
            src/espeak_command.cpp \
            src/event.cpp \
            src/fifo.cpp \
-           src/wave.cpp \
+           src/wave_pulse.cpp \
            src/debug.cpp \
            src/klatt.cpp \
            src/sonic.cpp
