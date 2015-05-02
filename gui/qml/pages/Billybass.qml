@@ -50,6 +50,11 @@ Page
                 text: espeak.libespeakVersion
                 anchors.horizontalCenter: parent.horizontalCenter
             }
+            Label
+            {
+                text: espeak.language
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
             TextField
             {
                 id: textfield

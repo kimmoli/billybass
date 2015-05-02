@@ -13,6 +13,7 @@ class Espeak : public QObject
     Q_OBJECT
     Q_PROPERTY(QString version READ readVersion NOTIFY versionChanged())
     Q_PROPERTY(QString libespeakVersion READ readLibespeakVersion NOTIFY libespeakVersionChanged())
+    Q_PROPERTY(QString language READ readLanguage NOTIFY languageChanged())
 
 public:
     explicit Espeak(QObject *parent = 0);
@@ -21,14 +22,17 @@ public:
     QString readVersion();
     Q_INVOKABLE void synth(QString text);
     QString readLibespeakVersion() { return _libespeakVersion; }
+    QString readLanguage() { return _language; }
 
 signals:
     void versionChanged();
     void libespeakVersionChanged();
+    void languageChanged();
 
 private:
     QString _libespeakVersion;
     bool _espeakInitialized;
+    QString _language;
 
 };
 

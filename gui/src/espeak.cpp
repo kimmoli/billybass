@@ -11,6 +11,7 @@ Espeak::Espeak(QObject *parent) :
     emit versionChanged();
     _libespeakVersion = "N/A";
     _espeakInitialized = false;
+    _language = "N/A";
 }
 
 Espeak::~Espeak()
@@ -36,7 +37,7 @@ void Espeak::synth(QString text)
         const char *path_data;
         int sampleRate;
 
-        QString language = QLocale::system().name().split('_').at(0);
+        _language = QLocale::system().name().split('_').at(0);
 
         sampleRate = espeak_Initialize(AUDIO_OUTPUT_PLAYBACK, 0, NULL, 0);
         version = espeak_Info(&path_data);
@@ -47,17 +48,20 @@ void Espeak::synth(QString text)
         _libespeakVersion = QString(version);
         emit libespeakVersionChanged();
 
-        qDebug() << "setting language to" << language;
+        qDebug() << "setting language to" << _language;
 
-        if (espeak_SetVoiceByName(language.toLocal8Bit().data()) != EE_OK)
+        if (espeak_SetVoiceByName(_language.toLocal8Bit().data()) != EE_OK)
         {
             qDebug() << "language set failed, fallback to english";
-            if (espeak_SetVoiceByName("en") != EE_OK)
+            _language = "en";
+            if (espeak_SetVoiceByName(_language.toLocal8Bit().data()) != EE_OK)
             {
                 qDebug() << "language fallback failed, quitting here";
                 return;
             }
         }
+        emit languageChanged();
+
         _espeakInitialized = true;
     }
 
