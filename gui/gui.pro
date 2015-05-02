@@ -24,7 +24,8 @@ OTHER_FILES += \
     qml/pages/Billybass.qml \
     qml/pages/AboutPage.qml \
     harbour-billybass.png \
-    harbour-billybass.desktop
+    harbour-billybass.desktop \
+    config\espeak.conf
 
 LIBS += -L$$OUT_PWD/../espeak/ -lespeak
 
@@ -39,4 +40,7 @@ espeak_data.path = $${DATADIR}
 lib.files = $$OUT_PWD/../espeak/libespeak.so*
 lib.path = /usr/share/$${TARGET}/lib
 
-INSTALLS += lib espeak_data
+policy.files = $$PWD/config/espeak.conf
+policy.path = /etc/pulse/xpolicy.conf.d
+
+INSTALLS += lib espeak_data policy

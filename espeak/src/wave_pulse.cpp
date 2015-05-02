@@ -65,8 +65,6 @@ enum {
 
 static t_wave_callback* my_callback_is_output_enabled=NULL;
 
-static pa_proplist *proplist = NULL;
-
 #define SAMPLE_RATE 22050
 #define ESPEAK_FORMAT PA_SAMPLE_S16LE
 #define ESPEAK_CHANNEL 1
@@ -607,7 +605,7 @@ static int pulse_open()
     }
 
     SHOW_TIME("pa_stream_new");
-    if (!(stream = pa_stream_new(context, "unknown", &ss, NULL)))
+    if (!(stream = pa_stream_new(context, "text-to-speech", &ss, NULL)))
     {
         SHOW("Failed to create stream: %s", pa_strerror(pa_context_errno(context)));
         goto unlock_and_fail;

@@ -53,3 +53,7 @@ desktop-file-install --delete-original       \
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/86x86/apps/%{name}.png
+%config /etc/pulse/xpolicy.conf.d/espeak.conf
+
+%post
+systemctl-user restart pulseaudio
