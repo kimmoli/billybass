@@ -47,7 +47,7 @@ Page
             }
             Label
             {
-                text: libespeakVersion
+                text: espeak.libespeakVersion
                 anchors.horizontalCenter: parent.horizontalCenter
             }
             TextField

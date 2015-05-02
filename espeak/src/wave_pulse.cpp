@@ -65,15 +65,24 @@ enum {
 
 static t_wave_callback* my_callback_is_output_enabled=NULL;
 
+static pa_proplist *proplist = NULL;
+
 #define SAMPLE_RATE 22050
 #define ESPEAK_FORMAT PA_SAMPLE_S16LE
 #define ESPEAK_CHANNEL 1
 
-#define MAXLENGTH 132300
-#define TLENGTH 4410
-#define PREBUF 2200
-#define MINREQ 880
+//#define MAXLENGTH 132300
+//#define TLENGTH 4410
+//#define PREBUF 2200
+//#define MINREQ 880
+//#define FRAGSIZE 0
+/* Get buffer metrics from pacat output --verbose on device */
+#define MAXLENGTH 4194304
+#define TLENGTH 88200
+#define PREBUF 87320
+#define MINREQ 882
 #define FRAGSIZE 0
+
 
 #ifdef USE_PORTAUDIO
 // rename functions to be wrapped
@@ -116,11 +125,11 @@ static pa_threaded_mainloop *mainloop = NULL;
 
 static int do_trigger = 0;
 static uint64_t written = 0;
-static int time_offset_msec = 0;
+static uint64_t time_offset_msec = 0;
 static int just_flushed = 0;
 
 static int connected = 0;
-static int wave_samplerate;
+static long wave_samplerate;
 
 #define CHECK_DEAD_GOTO(label, warn) do { \
 if (!mainloop || \
@@ -180,15 +189,29 @@ static void context_state_cb(pa_context *c, void *userdata) {
 
     switch (pa_context_get_state(c)) {
         case PA_CONTEXT_READY:
+            SHOW_TIME("PA_CONTEXT_READY");
+            pa_threaded_mainloop_signal(mainloop, 0);
+            break;
         case PA_CONTEXT_TERMINATED:
+            SHOW_TIME("PA_CONTEXT_TERMINATED");
+            pa_threaded_mainloop_signal(mainloop, 0);
+            break;
         case PA_CONTEXT_FAILED:
+            SHOW_TIME("PA_CONTEXT_FAILED");
             pa_threaded_mainloop_signal(mainloop, 0);
             break;
 
         case PA_CONTEXT_UNCONNECTED:
+            SHOW_TIME("PA_CONTEXT_UNCONNECTED");
+            break;
         case PA_CONTEXT_CONNECTING:
+            SHOW_TIME("PA_CONTEXT_CONNECTING");
+            break;
         case PA_CONTEXT_AUTHORIZING:
+            SHOW_TIME("PA_CONTEXT_AUTHORIZING");
+            break;
         case PA_CONTEXT_SETTING_NAME:
+            SHOW_TIME("PA_CONTEXT_SETTING_NAME");
             break;
     }
 }
@@ -200,13 +223,23 @@ static void stream_state_cb(pa_stream *s, void * userdata) {
     switch (pa_stream_get_state(s)) {
 
         case PA_STREAM_READY:
+            SHOW_TIME("PA_STREAM_READY");
+            pa_threaded_mainloop_signal(mainloop, 0);
+            break;
         case PA_STREAM_FAILED:
+            SHOW_TIME("PA_STREAM_FAILED");
+            pa_threaded_mainloop_signal(mainloop, 0);
+            break;
         case PA_STREAM_TERMINATED:
+            SHOW_TIME("PA_STREAM_TERMINATED");
             pa_threaded_mainloop_signal(mainloop, 0);
             break;
 
         case PA_STREAM_UNCONNECTED:
+            SHOW_TIME("PA_STREAM_UNCONNECTED");
+            break;
         case PA_STREAM_CREATING:
+            SHOW_TIME("PA_STREAM_CREATING");
             break;
     }
 }
@@ -214,6 +247,26 @@ static void stream_state_cb(pa_stream *s, void * userdata) {
 static void stream_success_cb(pa_stream *s, int success, void *userdata) {
   ENTER(__FUNCTION__);
     assert(s);
+
+    switch (pa_stream_get_state(s)) {
+
+        case PA_STREAM_READY:
+            SHOW_TIME("PA_STREAM_READY");
+            break;
+        case PA_STREAM_FAILED:
+            SHOW_TIME("PA_STREAM_FAILED");
+            break;
+        case PA_STREAM_TERMINATED:
+            SHOW_TIME("PA_STREAM_TERMINATED");
+            break;
+        case PA_STREAM_UNCONNECTED:
+            SHOW_TIME("PA_STREAM_UNCONNECTED");
+            break;
+        case PA_STREAM_CREATING:
+            SHOW_TIME("PA_STREAM_CREATING");
+            break;
+    }
+
 
     if (userdata)
         *(int*) userdata = success;
@@ -245,18 +298,19 @@ static void stream_latency_update_cb(pa_stream *s, void *userdata) {
     pa_threaded_mainloop_signal(mainloop, 0);
 }
 
-static int pulse_free(void) {
+static uint32_t pulse_free(void) {
   ENTER(__FUNCTION__);
     size_t l = 0;
     pa_operation *o = NULL;
 
     CHECK_CONNECTED(0);
 
-    SHOW("pulse_free: %s (call)\n", "pa_threaded_main_loop_lock");
+    SHOW("pulse_free: %s (call) do_t=%d\n", "pa_threaded_main_loop_lock", do_trigger);
     pa_threaded_mainloop_lock(mainloop);
     CHECK_DEAD_GOTO(fail, 1);
 
-    if ((l = pa_stream_writable_size(stream)) == (size_t) -1) {
+    if ((l = pa_stream_writable_size(stream)) == (size_t) -1)
+    {
         SHOW("pa_stream_writable_size() failed: %s", pa_strerror(pa_context_errno(context)));
         l = 0;
         goto fail;
@@ -270,13 +324,15 @@ static int pulse_free(void) {
         int success = 0;
 
 	SHOW("pulse_free: %s (call)\n", "pa_stream_trigger");
-        if (!(o = pa_stream_trigger(stream, stream_success_cb, &success))) {
+        if (!(o = pa_stream_trigger(stream, stream_success_cb, &success)))
+        {
             SHOW("pa_stream_trigger() failed: %s", pa_strerror(pa_context_errno(context)));
             goto fail;
         }
         
 	SHOW("pulse_free: %s (call)\n", "pa_threaded_main_loop");
-        while (pa_operation_get_state(o) != PA_OPERATION_DONE) {
+        while (pa_operation_get_state(o) != PA_OPERATION_DONE)
+        {
             CHECK_DEAD_GOTO(fail, 1);
             pa_threaded_mainloop_wait(mainloop);
         } 
@@ -295,8 +351,8 @@ fail:
     pa_threaded_mainloop_unlock(mainloop);
 
     do_trigger = !!l;
-    SHOW("pulse_free: %d (ret)\n", (int)l);
-    return (int) l;
+    SHOW("pulse_free: %ld (ret) (do_t=%ld)\n", (uint32_t)l, do_trigger);
+    return (uint32_t) l;
 }
 
 static int pulse_playing(const pa_timing_info *the_timing_info) {
@@ -372,18 +428,29 @@ fail:
 // }
 
 
-static void pulse_write(void* ptr, int length) {
+static void pulse_write(void* ptr, long length)
+{
   ENTER(__FUNCTION__);
 
+#if DEBUG_ENABLED
+  FILE *f;
+  f = fopen("/tmp/pulsewrite.dat", "ab");
+  fwrite(ptr, length, 1, f);
+  fclose(f);
+  SHOW("pulse_write > wrote to file (%d)\n", length);
+#endif
 
-  SHOW("pulse_write > length=%d\n", length);
+
+
+  SHOW("pulse_write > length=%ld\n", length);
 
     CHECK_CONNECTED_NO_RETVAL();
 
     pa_threaded_mainloop_lock(mainloop);
     CHECK_DEAD_GOTO(fail, 1);
 
-    if (pa_stream_write(stream, ptr, length, NULL, PA_SEEK_RELATIVE, (pa_seek_mode_t)0) < 0) {
+    if (pa_stream_write(stream, ptr, length, NULL, (pa_seek_mode_t)0, PA_SEEK_RELATIVE) < 0)
+    {
         SHOW("pa_stream_write() failed: %s", pa_strerror(pa_context_errno(context)));
         goto fail;
     }
@@ -493,15 +560,17 @@ static int pulse_open()
       return false;
 
     SHOW_TIME("pa_threaded_mainloop_new (call)");
-    if (!(mainloop = pa_threaded_mainloop_new())) {
-      SHOW("Failed to allocate main loop\n","");
+    if (!(mainloop = pa_threaded_mainloop_new()))
+    {
+        SHOW("Failed to allocate main loop\n","");
         goto fail;
     }
 
     pa_threaded_mainloop_lock(mainloop);
 
     SHOW_TIME("pa_context_new (call)");
-    if (!(context = pa_context_new(pa_threaded_mainloop_get_api(mainloop), "eSpeak"))) {
+    if (!(context = pa_context_new(pa_threaded_mainloop_get_api(mainloop), "eSpeak")))
+    {
       SHOW("Failed to allocate context\n","");
       goto unlock_and_fail;
     }
@@ -510,15 +579,17 @@ static int pulse_open()
     pa_context_set_subscribe_callback(context, subscribe_cb, NULL);
 
     SHOW_TIME("pa_context_connect (call)");
-    if (pa_context_connect(context, NULL, (pa_context_flags_t)0, NULL) < 0) {
+    if (pa_context_connect(context, NULL, (pa_context_flags_t)0, NULL) < 0)
+    {
         SHOW("Failed to connect to server: %s", pa_strerror(pa_context_errno(context)));
-	ret = PULSE_NO_CONNECTION;
+        ret = PULSE_NO_CONNECTION;
         goto unlock_and_fail;
     }
 
     SHOW_TIME("pa_threaded_mainloop_start (call)");
-    if (pa_threaded_mainloop_start(mainloop) < 0) {
-      SHOW("Failed to start main loop","");
+    if (pa_threaded_mainloop_start(mainloop) < 0)
+    {
+        SHOW("Failed to start main loop","");
         goto unlock_and_fail;
     }
 
@@ -526,16 +597,18 @@ static int pulse_open()
     SHOW_TIME("pa_threaded_mainloop_wait");
     pa_threaded_mainloop_wait(mainloop);
 
-    if (pa_context_get_state(context) != PA_CONTEXT_READY) {
+    if (pa_context_get_state(context) != PA_CONTEXT_READY)
+    {
         SHOW("Failed to connect to server: %s", pa_strerror(pa_context_errno(context)));
-	ret = PULSE_NO_CONNECTION;
- 	if (mainloop)
- 	  pa_threaded_mainloop_stop(mainloop);
+        ret = PULSE_NO_CONNECTION;
+        if (mainloop)
+            pa_threaded_mainloop_stop(mainloop);
         goto unlock_and_fail;
     }
 
     SHOW_TIME("pa_stream_new");
-    if (!(stream = pa_stream_new(context, "unknown", &ss, NULL))) {
+    if (!(stream = pa_stream_new(context, "unknown", &ss, NULL)))
+    {
         SHOW("Failed to create stream: %s", pa_strerror(pa_context_errno(context)));
         goto unlock_and_fail;
     }
@@ -553,7 +626,8 @@ static int pulse_open()
     a_attr.fragsize = 0;
 
     SHOW_TIME("pa_connect_playback");
-    if (pa_stream_connect_playback(stream, NULL, &a_attr, (pa_stream_flags_t)(PA_STREAM_INTERPOLATE_TIMING|PA_STREAM_AUTO_TIMING_UPDATE), NULL, NULL) < 0) {
+    if (pa_stream_connect_playback(stream, NULL, &a_attr, (pa_stream_flags_t)(PA_STREAM_INTERPOLATE_TIMING|PA_STREAM_AUTO_TIMING_UPDATE), NULL, NULL) < 0)
+    {
         SHOW("Failed to connect stream: %s", pa_strerror(pa_context_errno(context)));
         goto unlock_and_fail;
     }
@@ -562,28 +636,32 @@ static int pulse_open()
     SHOW_TIME("pa_threaded_mainloop_wait");
     pa_threaded_mainloop_wait(mainloop);
 
-    if (pa_stream_get_state(stream) != PA_STREAM_READY) {
+    if (pa_stream_get_state(stream) != PA_STREAM_READY)
+    {
         SHOW("Failed to connect stream: %s", pa_strerror(pa_context_errno(context)));
         goto unlock_and_fail;
     }
 
     /* Now subscribe to events */
     SHOW_TIME("pa_context_subscribe");
-    if (!(o = pa_context_subscribe(context, PA_SUBSCRIPTION_MASK_SINK_INPUT, context_success_cb, &success))) {
+    if (!(o = pa_context_subscribe(context, PA_SUBSCRIPTION_MASK_SINK_INPUT, context_success_cb, &success)))
+    {
         SHOW("pa_context_subscribe() failed: %s", pa_strerror(pa_context_errno(context)));
         goto unlock_and_fail;
     }
     
     success = 0;
     SHOW_TIME("pa_threaded_mainloop_wait");
-    while (pa_operation_get_state(o) != PA_OPERATION_DONE) {
+    while (pa_operation_get_state(o) != PA_OPERATION_DONE)
+    {
         CHECK_DEAD_GOTO(fail, 1);
         pa_threaded_mainloop_wait(mainloop);
     }
 
     pa_operation_unref(o);
 
-    if (!success) {
+    if (!success)
+    {
         SHOW("pa_context_subscribe() failed: %s", pa_strerror(pa_context_errno(context)));
         goto unlock_and_fail;
     }
@@ -610,21 +688,25 @@ fail:
 
     //    pulse_close();
 
-  if (ret == PULSE_NO_CONNECTION) {
-    if (context) {
+  if (ret == PULSE_NO_CONNECTION)
+  {
+    if (context)
+    {
       SHOW_TIME("pa_context_disconnect (call)");
       pa_context_disconnect(context);
       pa_context_unref(context);
       context = NULL;
     }
   
-    if (mainloop) {
+    if (mainloop)
+    {
       SHOW_TIME("pa_threaded_mainloop_free (call)");
       pa_threaded_mainloop_free(mainloop);
       mainloop = NULL;
     }  
   } 
-  else {
+  else
+  {
     pulse_close();
   }
 
@@ -660,12 +742,12 @@ void wave_set_callback_is_output_enabled(t_wave_callback* cb)
 //>
 //<wave_init
 
-int wave_init(int srate)
+int wave_init(uint32_t srate)
 {
   ENTER("wave_init");
 
   stream = NULL;
-	wave_samplerate = srate;
+  wave_samplerate = srate;
 
   return pulse_open() == PULSE_OK;
 }
@@ -687,6 +769,14 @@ size_t wave_write(void* theHandler, char* theMono16BitsWaveBuffer, size_t theSiz
   ENTER("wave_write");
   size_t bytes_to_write = theSize;
   char* aBuffer=theMono16BitsWaveBuffer;
+
+#if DEBUG_ENABLED
+  FILE *f;
+  f = fopen("/tmp/espeak.dat", "ab");
+  fwrite(aBuffer, bytes_to_write, 1, f);
+  fclose(f);
+  SHOW("wave_write > wrote to file (%d)\n", bytes_to_write);
+#endif
 
   assert(stream);
 
@@ -734,7 +824,7 @@ size_t wave_write(void* theHandler, char* theMono16BitsWaveBuffer, size_t theSiz
 
  terminate:
   pthread_mutex_unlock(&pulse_mutex);
-  SHOW("wave_write: theSize=%d", theSize);
+  SHOW("wave_write: theSize=%d\n", theSize);
   SHOW_TIME("wave_write > LEAVE");
   return theSize;
 }
@@ -783,6 +873,7 @@ int wave_is_busy(void* theHandler)
   pa_timing_info a_timing_info;
   int active = pulse_playing(&a_timing_info);
   SHOW("wave_is_busy: %d\n",active);
+
   return active;
 }
 

@@ -7,7 +7,7 @@
 
 extern int option_device_number;
 
-extern int wave_init(int samplerate);
+extern int wave_init(uint32_t samplerate);
 // TBD: the arg could be "alsa", "oss",...
 extern void* wave_open(const char* the_api);
 

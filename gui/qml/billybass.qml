@@ -31,7 +31,6 @@ ApplicationWindow
     Espeak
     {
         id: espeak
-        Component.onCompleted: libespeakVersion = espeak.libVersion()
     }
 
 
