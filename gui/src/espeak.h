@@ -28,6 +28,7 @@ signals:
 
 private:
     QString _libespeakVersion;
+    bool _espeakInitialized;
 
 };
 
