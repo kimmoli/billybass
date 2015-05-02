@@ -17,6 +17,7 @@ message($${DEFINES})
 
 INCLUDEPATH += src
 
+# for running sdk in windows host, not allowing symlinks to be created in vm
 QMAKE_POST_LINK += $$PWD/libcopy.sh $$OUT_PWD lib$${TARGET} $${VERSION}
 
 HEADERS += src/debug.h \
