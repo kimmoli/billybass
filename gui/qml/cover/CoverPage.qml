@@ -10,7 +10,7 @@ CoverBackground
     CoverPlaceholder
     {
         text: "Billybass"
-        icon.source: "/usr/share/icons/hicolor/86x86/apps/billybass.png"
+        icon.source: "/usr/share/icons/hicolor/86x86/apps/harbour-billybass.png"
     }
 
     CoverActionList

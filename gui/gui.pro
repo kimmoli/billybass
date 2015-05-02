@@ -2,7 +2,7 @@
 # Project billybass, Billy Bass
 #
 
-TARGET = billybass
+TARGET = harbour-billybass
 
 CONFIG += sailfishapp
 
@@ -23,10 +23,12 @@ OTHER_FILES += \
     qml/cover/CoverPage.qml \
     qml/pages/Billybass.qml \
     qml/pages/AboutPage.qml \
-    billybass.png \
-    billybass.desktop
+    harbour-billybass.png \
+    harbour-billybass.desktop
 
 LIBS += -L$$OUT_PWD/../espeak/ -lespeak
+
+QMAKE_RPATHDIR += /usr/share/$${TARGET}/lib
 
 DEPENDPATH += ../espeak/linux_32bit/shared_library
 INCLUDEPATH += ../espeak/linux_32bit/shared_library
@@ -35,6 +37,6 @@ espeak_data.files = $$PWD/../espeak/espeak-data/*
 espeak_data.path = $${DATADIR}
 
 lib.files = $$OUT_PWD/../espeak/libespeak.so*
-lib.path = /usr/share/billybass/lib
+lib.path = /usr/share/$${TARGET}/lib
 
 INSTALLS += lib espeak_data

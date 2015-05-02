@@ -22,7 +22,7 @@ Page
                                           { "version": espeak.version,
                                               "year": "2014",
                                               "name": "Billy Bass",
-                                              "imagelocation": "/usr/share/icons/hicolor/86x86/apps/billybass.png"} )
+                                              "imagelocation": "/usr/share/icons/hicolor/86x86/apps/harbour-billybass.png"} )
             }
         }
 

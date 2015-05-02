@@ -1,1 +1,1 @@
-DATADIR=/usr/share/billybass/espeak-data
+DATADIR=/usr/share/harbour-billybass/espeak-data

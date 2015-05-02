@@ -2,7 +2,10 @@
 # spec file for billybass, Billy Bass
 # 
 
-Name:       billybass
+Name:       harbour-billybass
+
+%define __provides_exclude_from ^%{_datadir}/.*$
+%define __requires_exclude ^libespeak.*$
 
 %{!?qtc_qmake:%define qtc_qmake %qmake}
 %{!?qtc_qmake5:%define qtc_qmake5 %qmake5}

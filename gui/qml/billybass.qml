@@ -4,7 +4,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import billybass.Espeak 1.0
+import harbour.billybass.espeak 1.0
 
 ApplicationWindow
 {

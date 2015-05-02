@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 X-Nemo-Application-Type=silica-qt5
-Name=billybass
-Icon=billybass
-Exec=billybass
+Name=Billy Bass
+Icon=harbour-billybass
+Exec=harbour-billybass
 

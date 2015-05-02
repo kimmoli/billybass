@@ -20,7 +20,7 @@
 
 int main(int argc, char *argv[])
 {
-    qmlRegisterType<Espeak>("billybass.Espeak", 1, 0, "Espeak");
+    qmlRegisterType<Espeak>("harbour.billybass.espeak", 1, 0, "Espeak");
 
     QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
     QScopedPointer<QQuickView> view(SailfishApp::createView());
