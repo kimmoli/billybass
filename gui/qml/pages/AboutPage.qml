@@ -33,7 +33,6 @@ Page
             }
             Label
             {
-                x: Theme.paddingLarge
                 text: name
                 color: Theme.primaryColor
                 font.pixelSize: Theme.fontSizeMedium
@@ -58,16 +57,28 @@ Page
 
             Label
             {
-                x: Theme.paddingLarge
-                text: "(C) " + year + " You made this"
+                text: "(C) " + year + " kimmoli"
                 color: Theme.primaryColor
                 font.pixelSize: Theme.fontSizeMedium
                 anchors.horizontalCenter: parent.horizontalCenter
             }
             Label
             {
-                x: Theme.paddingLarge
                 text: "Version: " + version
+                color: Theme.primaryColor
+                font.pixelSize: Theme.fontSizeMedium
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+            Label
+            {
+                text: "libespeak version: "
+                color: Theme.primaryColor
+                font.pixelSize: Theme.fontSizeMedium
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+            Label
+            {
+                text: espeak.libespeakVersion
                 color: Theme.primaryColor
                 font.pixelSize: Theme.fontSizeMedium
                 anchors.horizontalCenter: parent.horizontalCenter

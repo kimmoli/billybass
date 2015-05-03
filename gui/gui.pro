@@ -29,7 +29,8 @@ OTHER_FILES += \
     qml/pages/AboutPage.qml \
     harbour-billybass.png \
     harbour-billybass.desktop \
-    config\espeak.conf
+    config\espeak.conf \
+    qml/pages/LanguageSelector.qml
 
 # iphb stuff
 

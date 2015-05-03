@@ -35,7 +35,10 @@ ApplicationWindow
         Component.onCompleted: espeak.init()
     }
 
-
+    ListModel
+    {
+        id: languages
+    }
 
 }
 

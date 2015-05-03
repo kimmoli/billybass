@@ -20,9 +20,33 @@ Page
                 text: "About..."
                 onClicked: pageStack.push(Qt.resolvedUrl("AboutPage.qml"),
                                           { "version": espeak.version,
-                                              "year": "2014",
+                                              "year": "2015",
                                               "name": "Billy Bass",
                                               "imagelocation": "/usr/share/icons/hicolor/86x86/apps/harbour-billybass.png"} )
+            }
+            MenuItem
+            {
+                text: "Change language..."
+                onClicked:
+                {
+                    languages.clear()
+
+                    var tmp = espeak.getVoices()
+
+                    for (var i=0 ; i<tmp.length; i++)
+                    {
+                        console.log(i + " = " + tmp[i]["language"] + " - " + tmp[i]["voicename"] )
+
+                        languages.append({"language": tmp[i]["language"], "voicename": tmp[i]["voicename"]})
+                    }
+
+                    var dialog = pageStack.push(Qt.resolvedUrl("LanguageSelector.qml"))
+
+                    dialog.accepted.connect(function()
+                    {
+                        espeak.setLanguage(dialog.newLanguage)
+                    })
+                }
             }
         }
 
@@ -36,43 +60,27 @@ Page
             spacing: Theme.paddingLarge
             PageHeader
             {
-                title: "Billy Bass"
+                title: "Big Mouth Billy Bass"
             }
-            Label
-            {
-                x: Theme.paddingLarge
-                text: "Big Mouth"
-                color: Theme.primaryColor
-                font.pixelSize: Theme.fontSizeExtraLarge
-            }
-            Label
-            {
-                text: espeak.libespeakVersion
-                anchors.horizontalCenter: parent.horizontalCenter
-            }
+
             Label
             {
                 text: espeak.language
+                font.capitalization: Font.Capitalize
                 anchors.horizontalCenter: parent.horizontalCenter
             }
+
             TextField
             {
                 id: textfield
                 focus: false
                 width: parent.width
-                label: "Sano jotain"
+                label: "Synthesize this:"
                 font.pixelSize: Theme.fontSizeExtraLarge
                 color: Theme.primaryColor
-                placeholderText: "kirjoita tähän"
+                placeholderText: "Write here"
                 EnterKey.iconSource: "image://theme/icon-m-enter-accept"
                 EnterKey.onClicked: espeak.synth(text)
-            }
-
-            Button
-            {
-                text: "sano ny"
-                anchors.horizontalCenter: parent.horizontalCenter
-                onClicked: espeak.synth(textfield.text)
             }
         }
     }

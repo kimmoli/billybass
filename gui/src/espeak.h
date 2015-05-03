@@ -6,7 +6,8 @@
 #define ESPEAK_H
 #include <QObject>
 #include <QSocketNotifier>
-#include <QMutex>
+#include <QVariantList>
+#include <QVariantMap>
 #include "notificationmanager.h"
 
 extern "C"
@@ -38,6 +39,7 @@ public:
     Q_INVOKABLE void init();
     Q_INVOKABLE void setLanguage(QString language = QString());
     Q_INVOKABLE void replay();
+    Q_INVOKABLE QVariantList getVoices();
 
 signals:
     void versionChanged();
@@ -66,8 +68,6 @@ private:
     int iphb_fd;
     QSocketNotifier *iphbNotifier;
     bool iphbRunning;
-
-    QMutex mutex;
 };
 
 

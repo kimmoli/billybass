@@ -176,9 +176,9 @@ void Espeak::init()
         emit libespeakVersionChanged();
     }
 
-    setLanguage(_language);
-
     _espeakInitialized = true;
+
+    setLanguage(_language);
 }
 
 void Espeak::setLanguage(QString language)
@@ -190,14 +190,17 @@ void Espeak::setLanguage(QString language)
 
     qDebug() << "setting language to" << lang;
 
-    if (espeak_SetVoiceByName(lang.toLocal8Bit().data()) != EE_OK)
+    if(_espeakInitialized)
     {
-        qDebug() << "language set failed, fallback to english";
-        lang= "en";
         if (espeak_SetVoiceByName(lang.toLocal8Bit().data()) != EE_OK)
         {
-            qDebug() << "language fallback failed.";
-            return;
+            qDebug() << "language set failed, fallback to english";
+            lang= "english";
+            if (espeak_SetVoiceByName(lang.toLocal8Bit().data()) != EE_OK)
+            {
+                qDebug() << "language fallback failed.";
+                return;
+            }
         }
     }
 
@@ -247,4 +250,74 @@ void Espeak::terminate()
         qDebug() << "terminated";
     }
     _terminating = false;
+}
+
+QVariantList Espeak::getVoices()
+{
+    QVariantList tmp;
+    QVariantMap map;
+
+    /* TODO: Cleanup */
+
+    int ix;
+    const char *p;
+    int len;
+    int count;
+    int c;
+    int j;
+    const espeak_VOICE *v;
+    const char *lang_name;
+    char age_buf[12];
+    char buf[80];
+    char f_out[180];
+    const espeak_VOICE **voices;
+
+    static char genders[4] = {'-','M','F','-'};
+
+    voices = espeak_ListVoices(NULL);
+
+    qDebug() << "Pty Language Age/Gender VoiceName          File          Other Languages";
+
+    for(ix=0; (v = voices[ix]) != NULL; ix++)
+    {
+        count = 0;
+        p = v->languages;
+        while(*p != 0)
+        {
+            len = strlen(p+1);
+            lang_name = p+1;
+
+            if(v->age == 0)
+                strcpy(age_buf,"   ");
+            else
+                sprintf(age_buf,"%3d",v->age);
+
+            if(count==0)
+            {
+                for(j=0; j < sizeof(buf); j++)
+                {
+                    // replace spaces in the name
+                    if((c = v->name[j]) == ' ')
+                        c = '_';
+                    if((buf[j] = c) == 0)
+                        break;
+                }
+                sprintf(f_out,"%2d  %-12s%s%c  %-20s %-13s ",
+               p[0],lang_name,age_buf,genders[v->gender],buf,v->identifier);
+
+                map.clear();
+                map.insert("language", QString(lang_name));
+                map.insert("voicename", QString(buf));
+                tmp.append(map);
+            }
+            else
+            {
+                sprintf(f_out + strlen(f_out),"(%s %d)",lang_name,p[0]);
+            }
+            count++;
+            p += len+2;
+        }
+        qDebug() << QString(f_out);
+    }
+    return tmp;
 }
