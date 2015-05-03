@@ -17,12 +17,6 @@ CoverBackground
     {
         CoverAction
         {
-            iconSource: coverActionLeftIcon
-            onTriggered: coverActionLeft()
-        }
-
-        CoverAction
-        {
             iconSource: coverActionRightIcon
             onTriggered: coverActionRight()
         }

@@ -14,6 +14,7 @@ Espeak::Espeak(QObject *parent) :
     _espeakInitialized = false;
     _language = "N/A";
     _synthFlags = espeakCHARS_AUTO | espeakPHONEMES | espeakENDPAUSE;
+    _lastStringSynth = QString();
 
     notifications = new NotificationManager();
 
@@ -48,6 +49,8 @@ void Espeak::synth(QString text)
     {
         qDebug() << "synth failed" << ret;
     }
+
+    _lastStringSynth = text;
 }
 
 void Espeak::init()
@@ -103,4 +106,9 @@ void Espeak::speakNotification(QString message)
     QThread::msleep(2000);
 
     synth(message);
+}
+
+void Espeak::replay()
+{
+    synth(_lastStringSynth);
 }

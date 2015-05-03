@@ -28,6 +28,7 @@ public:
     QString readLanguage() { return _language; }
     Q_INVOKABLE void init();
     Q_INVOKABLE void setLanguage(QString language = QString());
+    Q_INVOKABLE void replay();
 
 signals:
     void versionChanged();
@@ -42,6 +43,8 @@ private:
     bool _espeakInitialized;
     QString _language;
     int _synthFlags;
+    QString _lastStringSynth;
+
     NotificationManager *notifications;
 
 };

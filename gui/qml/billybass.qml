@@ -26,6 +26,7 @@ ApplicationWindow
     function coverActionRight()
     {
         console.log("Right cover action")
+        espeak.replay()
     }
 
     Espeak
