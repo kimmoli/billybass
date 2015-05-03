@@ -5,6 +5,7 @@
 TARGET = harbour-billybass
 
 CONFIG += sailfishapp
+QT += dbus
 
 include(../common.pri)
 
@@ -14,9 +15,11 @@ message($${DEFINES})
 
 SOURCES += \
     src/billybass.cpp \
-    src/espeak.cpp
+    src/espeak.cpp \
+    src/notificationmanager.cpp
 	
-HEADERS += src/espeak.h
+HEADERS += src/espeak.h \
+    src/notificationmanager.h
 
 OTHER_FILES += \
     qml/billybass.qml \

@@ -5,9 +5,12 @@
 #ifndef ESPEAK_H
 #define ESPEAK_H
 #include <QObject>
+#include "notificationmanager.h"
+
 extern "C" {
 #include "speak_lib.h"
 }
+
 class Espeak : public QObject
 {
     Q_OBJECT
@@ -31,10 +34,15 @@ signals:
     void libespeakVersionChanged();
     void languageChanged();
 
+public slots:
+    void speakNotification(QString message);
+
 private:
     QString _libespeakVersion;
     bool _espeakInitialized;
     QString _language;
+    int _synthFlags;
+    NotificationManager *notifications;
 
 };
 

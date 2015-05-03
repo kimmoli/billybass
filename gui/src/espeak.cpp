@@ -4,6 +4,7 @@
 
 #include "espeak.h"
 #include <QDebug>
+#include <QThread>
 
 Espeak::Espeak(QObject *parent) :
     QObject(parent)
@@ -12,6 +13,11 @@ Espeak::Espeak(QObject *parent) :
     _libespeakVersion = "N/A";
     _espeakInitialized = false;
     _language = "N/A";
+    _synthFlags = espeakCHARS_AUTO | espeakPHONEMES | espeakENDPAUSE;
+
+    notifications = new NotificationManager();
+
+    connect(notifications, SIGNAL(gotNotification(QString)), this, SLOT(speakNotification(QString)));
 }
 
 Espeak::~Espeak()
@@ -26,22 +32,22 @@ QString Espeak::readVersion()
 
 void Espeak::synth(QString text)
 {
-    int synth_flags = espeakCHARS_AUTO | espeakPHONEMES | espeakENDPAUSE;
+    if (!_espeakInitialized)
+        return;
 
     if (text.isEmpty())
-        text = "hiljaa";
-
-    if (!_espeakInitialized)
     {
-        init();
+        qDebug() << "not synthesizing empty string";
+        return;
     }
 
-    espeak_ERROR ret = espeak_Synth(text.toLatin1().data(), text.length()+1, 0, POS_CHARACTER, 0, synth_flags, NULL, NULL);
+    qDebug() << "synth:" << text;
+
+    espeak_ERROR ret = espeak_Synth(text.toLatin1().data(), text.length()+1, 0, POS_CHARACTER, 0, _synthFlags, NULL, NULL);
     if (ret != EE_OK)
     {
         qDebug() << "synth failed" << ret;
     }
-    qDebug() << "done";
 }
 
 void Espeak::init()
@@ -86,4 +92,15 @@ void Espeak::setLanguage(QString language)
 
     _language = lang;
     emit languageChanged();
+}
+
+void Espeak::speakNotification(QString message)
+{
+    if (!_espeakInitialized)
+        return;
+
+    /* Allow system notification sound to be played */
+    QThread::msleep(2000);
+
+    synth(message);
 }
