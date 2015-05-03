@@ -5,11 +5,20 @@
 #ifndef ESPEAK_H
 #define ESPEAK_H
 #include <QObject>
+#include <QSocketNotifier>
+#include <QMutex>
 #include "notificationmanager.h"
 
-extern "C" {
+extern "C"
+{
 #include "speak_lib.h"
 }
+
+extern "C"
+{
+#include "iphbd/libiphb.h"
+}
+
 
 class Espeak : public QObject
 {
@@ -35,12 +44,16 @@ signals:
     void libespeakVersionChanged();
     void languageChanged();
 
-public slots:
+private slots:
     void speakNotification(QString message);
+    void heartbeatReceived(int sock);
+    void iphbStop();
+    void iphbStart();
 
 private:
     QString _libespeakVersion;
     bool _espeakInitialized;
+    bool _terminating;
     QString _language;
     int _synthFlags;
     QString _lastStringSynth;
@@ -49,6 +62,12 @@ private:
 
     void terminate();
 
+    iphb_t iphbdHandler;
+    int iphb_fd;
+    QSocketNotifier *iphbNotifier;
+    bool iphbRunning;
+
+    QMutex mutex;
 };
 
 

@@ -17,8 +17,9 @@ SOURCES += \
     src/billybass.cpp \
     src/espeak.cpp \
     src/notificationmanager.cpp
-	
-HEADERS += src/espeak.h \
+
+HEADERS += \
+    src/espeak.h \
     src/notificationmanager.h
 
 OTHER_FILES += \
@@ -29,6 +30,28 @@ OTHER_FILES += \
     harbour-billybass.png \
     harbour-billybass.desktop \
     config\espeak.conf
+
+# iphb stuff
+
+INCLUDEPATH += \
+    ./3rdparty/libdsme/include/ \
+    ./3rdparty/mce-dev/include/ \
+    ./3rdparty/libiphb/src/
+
+LIBS += -lrt
+
+SOURCES += \
+    3rdparty/libiphb/src/libiphb.c
+
+HEADERS += \
+    3rdparty/libiphb/src/libiphb.h \
+    3rdparty/libiphb/src/iphb_internal.h \
+    3rdparty/libdsme/include/dsme/messages.h \
+    3rdparty/mce-dev/include/mce/dbus-names.h
+
+# end of iphb stuff
+
+# espeak stuff
 
 LIBS += -L$$OUT_PWD/../espeak/ -lespeak
 
@@ -47,3 +70,5 @@ policy.files = $$PWD/config/espeak.conf
 policy.path = /etc/pulse/xpolicy.conf.d
 
 INSTALLS += lib espeak_data policy
+
+# end of espeak sutff
