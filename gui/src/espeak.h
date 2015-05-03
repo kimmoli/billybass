@@ -47,6 +47,8 @@ private:
 
     NotificationManager *notifications;
 
+    void terminate();
+
 };
 
 

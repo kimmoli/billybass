@@ -23,6 +23,7 @@ Espeak::Espeak(QObject *parent) :
 
 Espeak::~Espeak()
 {
+    terminate();
 }
 
 QString Espeak::readVersion()
@@ -34,7 +35,7 @@ QString Espeak::readVersion()
 void Espeak::synth(QString text)
 {
     if (!_espeakInitialized)
-        return;
+        init();
 
     if (text.isEmpty())
     {
@@ -51,6 +52,8 @@ void Espeak::synth(QString text)
     }
 
     _lastStringSynth = text;
+
+    terminate();
 }
 
 void Espeak::init()
@@ -100,10 +103,10 @@ void Espeak::setLanguage(QString language)
 void Espeak::speakNotification(QString message)
 {
     if (!_espeakInitialized)
-        return;
+        init();
 
     /* Allow system notification sound to be played */
-    QThread::msleep(2000);
+    QThread::msleep(3000);
 
     synth(message);
 }
@@ -111,4 +114,19 @@ void Espeak::speakNotification(QString message)
 void Espeak::replay()
 {
     synth(_lastStringSynth);
+}
+
+void Espeak::terminate()
+{
+    if (_espeakInitialized)
+    {
+        while (espeak_IsPlaying())
+        {
+            QThread::msleep(100);
+        }
+        espeak_Terminate();
+        qDebug() << "terminated";
+    }
+
+    _espeakInitialized = false;
 }
