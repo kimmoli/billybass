@@ -23,6 +23,8 @@ public:
     Q_INVOKABLE void synth(QString text);
     QString readLibespeakVersion() { return _libespeakVersion; }
     QString readLanguage() { return _language; }
+    Q_INVOKABLE void init();
+    Q_INVOKABLE void setLanguage(QString language = QString());
 
 signals:
     void versionChanged();

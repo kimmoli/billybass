@@ -31,6 +31,7 @@ ApplicationWindow
     Espeak
     {
         id: espeak
+        Component.onCompleted: espeak.init()
     }
 
 

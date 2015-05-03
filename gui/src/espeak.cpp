@@ -33,36 +33,7 @@ void Espeak::synth(QString text)
 
     if (!_espeakInitialized)
     {
-        const char *version;
-        const char *path_data;
-        int sampleRate;
-
-        _language = QLocale::system().name().split('_').at(0);
-
-        sampleRate = espeak_Initialize(AUDIO_OUTPUT_PLAYBACK, 0, NULL, 0);
-        version = espeak_Info(&path_data);
-        qDebug() << "samplerate:" << sampleRate;
-        qDebug() << "version:" << QString(version);
-        qDebug() << "data path:" << QString(path_data);
-
-        _libespeakVersion = QString(version);
-        emit libespeakVersionChanged();
-
-        qDebug() << "setting language to" << _language;
-
-        if (espeak_SetVoiceByName(_language.toLocal8Bit().data()) != EE_OK)
-        {
-            qDebug() << "language set failed, fallback to english";
-            _language = "en";
-            if (espeak_SetVoiceByName(_language.toLocal8Bit().data()) != EE_OK)
-            {
-                qDebug() << "language fallback failed, quitting here";
-                return;
-            }
-        }
-        emit languageChanged();
-
-        _espeakInitialized = true;
+        init();
     }
 
     espeak_ERROR ret = espeak_Synth(text.toLatin1().data(), text.length()+1, 0, POS_CHARACTER, 0, synth_flags, NULL, NULL);
@@ -73,3 +44,46 @@ void Espeak::synth(QString text)
     qDebug() << "done";
 }
 
+void Espeak::init()
+{
+    const char *version;
+    const char *path_data;
+    int sampleRate;
+
+    sampleRate = espeak_Initialize(AUDIO_OUTPUT_PLAYBACK, 0, NULL, 0);
+    version = espeak_Info(&path_data);
+    qDebug() << "samplerate:" << sampleRate;
+    qDebug() << "version:" << QString(version);
+    qDebug() << "data path:" << QString(path_data);
+
+    _libespeakVersion = QString(version);
+    emit libespeakVersionChanged();
+
+    setLanguage(); // Select default language by locale
+
+    _espeakInitialized = true;
+}
+
+void Espeak::setLanguage(QString language)
+{
+    QString lang = language;
+
+    if (lang.isEmpty())
+        lang = QLocale::system().name().split('_').at(0);
+
+    qDebug() << "setting language to" << lang;
+
+    if (espeak_SetVoiceByName(lang.toLocal8Bit().data()) != EE_OK)
+    {
+        qDebug() << "language set failed, fallback to english";
+        lang= "en";
+        if (espeak_SetVoiceByName(lang.toLocal8Bit().data()) != EE_OK)
+        {
+            qDebug() << "language fallback failed.";
+            return;
+        }
+    }
+
+    _language = lang;
+    emit languageChanged();
+}
