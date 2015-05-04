@@ -10,8 +10,6 @@ ApplicationWindow
 {
     id: billybass
 
-    property string libespeakVersion: "unknown"
-
     property string coverActionLeftIcon: "image://theme/icon-cover-pause"
     property string coverActionRightIcon: "image://theme/icon-cover-play"
 
@@ -32,7 +30,7 @@ ApplicationWindow
     Espeak
     {
         id: espeak
-        Component.onCompleted: espeak.init()
+        Component.onCompleted: espeak.synth("billy")
     }
 
     ListModel

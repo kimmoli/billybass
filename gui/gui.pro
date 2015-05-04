@@ -14,13 +14,15 @@ DEFINES += "APPVERSION=\\\"$${SPECVERSION}\\\""
 message($${DEFINES})
 
 SOURCES += \
-    src/billybass.cpp \
     src/espeak.cpp \
-    src/notificationmanager.cpp
+    src/notificationmanager.cpp \
+    src/main.cpp \
+    src/billybass.cpp
 
 HEADERS += \
     src/espeak.h \
-    src/notificationmanager.h
+    src/notificationmanager.h \
+    src/billybass.h
 
 OTHER_FILES += \
     qml/billybass.qml \

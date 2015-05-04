@@ -24,50 +24,36 @@ extern "C"
 class Espeak : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString version READ readVersion NOTIFY versionChanged())
-    Q_PROPERTY(QString libespeakVersion READ readLibespeakVersion NOTIFY libespeakVersionChanged())
-    Q_PROPERTY(QString language READ readLanguage NOTIFY languageChanged())
 
 public:
     explicit Espeak(QObject *parent = 0);
     ~Espeak();
 
-    QString readVersion();
-    Q_INVOKABLE void synth(QString text);
-    QString readLibespeakVersion() { return _libespeakVersion; }
-    QString readLanguage() { return _language; }
-    Q_INVOKABLE void init();
-    Q_INVOKABLE void setLanguage(QString language = QString());
-    Q_INVOKABLE void replay();
-    Q_INVOKABLE QVariantList getVoices();
+    void replay();
+    QVariantList getVoices();
+
+    void requestSynth(QString message, QString language);
 
 signals:
-    void versionChanged();
-    void libespeakVersionChanged();
-    void languageChanged();
+    void synthRequested();
+    void synthComplete();
+    void libespeakVersionChanged(QString ver);
 
-private slots:
-    void speakNotification(QString message);
-    void heartbeatReceived(int sock);
-    void iphbStop();
-    void iphbStart();
+public slots:
+    void synth();
 
 private:
+    void init();
+    void setLanguage(QString language = QString());
+    void terminate();
+
     QString _libespeakVersion;
     bool _espeakInitialized;
     bool _terminating;
     QString _language;
     int _synthFlags;
-    QString _lastStringSynth;
+    QString _stringToSynth;
 
-    NotificationManager *notifications;
-
-    void terminate();
-
-    iphb_t iphbdHandler;
-    int iphb_fd;
-    QSocketNotifier *iphbNotifier;
-    bool iphbRunning;
 };
 
 
