@@ -15,6 +15,7 @@ BillyBass::BillyBass(QObject *parent) :
     _language = QString();
     _synthFlags = espeakCHARS_AUTO | espeakPHONEMES | espeakENDPAUSE;
     _lastStringSynth = QString();
+    _stfu = false;
 
     notifications = new NotificationManager();
 
@@ -146,6 +147,20 @@ void BillyBass::iphbStop()
     iphbRunning = false;
 }
 
+void BillyBass::writeStfu(bool stfu)
+{
+    _stfu = stfu;
+
+    if (_stfu && thread->isRunning())
+    {
+        qDebug() << "trying to cancel...";
+        espeak_Cancel();
+        espeak->terminate(true);
+    }
+
+    emit stfuChanged();
+}
+
 /* ESPEAK stuff */
 
 void BillyBass::synth(QString text)
@@ -162,6 +177,11 @@ void BillyBass::setLanguage(QString language)
 
 void BillyBass::speakNotification(QString message)
 {
+    _lastStringSynth = message;
+
+    if (_stfu)
+        return;
+
     /* Allow system notification sound to be played */
     iphbStart();
 

@@ -10,8 +10,8 @@ ApplicationWindow
 {
     id: billybass
 
-    property string coverActionLeftIcon: "image://theme/icon-cover-pause"
-    property string coverActionRightIcon: "image://theme/icon-cover-play"
+    property string coverActionLeftIcon: espeak.stfu ? "image://theme/icon-cover-play" : "image://theme/icon-cover-pause"
+    property string coverActionRightIcon: "image://theme/icon-cover-refresh"
 
     initialPage: Qt.resolvedUrl("pages/Billybass.qml")
     cover: Qt.resolvedUrl("cover/CoverPage.qml")
@@ -19,6 +19,7 @@ ApplicationWindow
     function coverActionLeft()
     {
         console.log("Left cover action")
+        espeak.stfu = !espeak.stfu
     }
 
     function coverActionRight()

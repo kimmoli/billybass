@@ -115,15 +115,20 @@ void Espeak::setLanguage(QString language)
     }
 }
 
-void Espeak::terminate()
+void Espeak::terminate(bool force)
 {
     if (_espeakInitialized)
     {
-        do
+        while (espeak_IsPlaying() && !force)
         {
             QThread::msleep(100);
         }
-        while (espeak_IsPlaying());
+
+        if (force)
+        {
+            espeak_Cancel();
+            QThread::msleep(100);
+        }
 
         espeak_Terminate();
 
@@ -131,7 +136,10 @@ void Espeak::terminate()
 
         _espeakInitialized = false;
 
-        qDebug() << "terminated";
+        qDebug() << "terminated" << (force ? "(forced)" : "");
+
+        if (force)
+            emit synthComplete();
     }
 }
 

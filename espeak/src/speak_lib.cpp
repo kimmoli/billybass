@@ -1202,6 +1202,12 @@ ESPEAK_API espeak_ERROR espeak_Cancel(void)
 {//===============================
 #ifdef USE_ASYNC
 	ENTER("espeak_Cancel");
+
+#ifdef USE_PULSEAUDIO
+        /* Brutely flush pulseaudio stream */
+        wave_force_flush();
+#endif
+
 	fifo_stop();
 	event_clear_all();
 
