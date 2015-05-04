@@ -10,7 +10,7 @@ Espeak::Espeak(QObject *parent) :
     QObject(parent)
 {
     _libespeakVersion = QString();
-    _stringToSynth = QString();
+    _stringToSynth.clear();
     _espeakInitialized = false;
     _language = QString();
     _synthFlags = espeakCHARS_AUTO | espeakPHONEMES | espeakENDPAUSE;
@@ -23,7 +23,7 @@ Espeak::~Espeak()
 
 void Espeak::requestSynth(QString message, QString language)
 {
-    _stringToSynth = message;
+    _stringToSynth.enqueue(message);
     _language = language;
 
     emit synthRequested();
@@ -34,22 +34,27 @@ void Espeak::synth()
     if (!_espeakInitialized)
         init();
 
-    if (_stringToSynth.isEmpty())
+    while (!_stringToSynth.isEmpty())
     {
-        qDebug() << "not synthesizing empty string";
-        terminate();
+        QString stringToSynth = _stringToSynth.dequeue();
 
-        emit synthComplete();
+        if (stringToSynth.isEmpty())
+        {
+            qDebug() << "not synthesizing empty string";
+            terminate();
 
-        return;
-    }
+            emit synthComplete();
 
-    qDebug() << "synth:" << _stringToSynth;
+            return;
+        }
 
-    espeak_ERROR ret = espeak_Synth(_stringToSynth.toLatin1().data(), _stringToSynth.length()+1, 0, POS_CHARACTER, 0, _synthFlags, NULL, NULL);
-    if (ret != EE_OK)
-    {
-        qDebug() << "synth failed" << ret;
+        qDebug() << "synth:" << stringToSynth;
+
+        espeak_ERROR ret = espeak_Synth(stringToSynth.toLatin1().data(), stringToSynth.length()+1, 0, POS_CHARACTER, 0, _synthFlags, NULL, NULL);
+        if (ret != EE_OK)
+        {
+            qDebug() << "synth failed" << ret;
+        }
     }
 
     terminate();

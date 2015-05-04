@@ -8,6 +8,7 @@
 #include <QSocketNotifier>
 #include <QVariantList>
 #include <QVariantMap>
+#include <QQueue>
 #include "notificationmanager.h"
 
 extern "C"
@@ -33,6 +34,7 @@ public:
     QVariantList getVoices();
 
     void requestSynth(QString message, QString language);
+    bool isQueueEmpty() { return _stringToSynth.isEmpty(); }
 
 signals:
     void synthRequested();
@@ -52,7 +54,7 @@ private:
     bool _terminating;
     QString _language;
     int _synthFlags;
-    QString _stringToSynth;
+    QQueue<QString> _stringToSynth;
 
 };
 

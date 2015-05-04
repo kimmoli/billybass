@@ -50,7 +50,7 @@ BillyBass::BillyBass(QObject *parent) :
 
     connect(espeak, SIGNAL(synthRequested()), thread, SLOT(start()));
     connect(thread, SIGNAL(started()), espeak, SLOT(synth()));
-    connect(espeak, SIGNAL(synthComplete()), thread, SLOT(quit()));
+    connect(espeak, SIGNAL(synthComplete()), this, SLOT(synthComplete()));
     connect(espeak, SIGNAL(libespeakVersionChanged(QString)), this, SLOT(espeakVersion(QString)));
 
 }
@@ -73,6 +73,16 @@ void BillyBass::espeakVersion(QString ver)
 {
     _libespeakVersion = ver;
     emit libespeakVersionChanged();
+}
+
+void BillyBass::synthComplete()
+{
+    thread->quit();
+
+    QThread::msleep(100);
+
+    if (!espeak->isQueueEmpty())
+        espeak->requestSynth(QString(), _language);
 }
 
 /* IPHB stuff */
