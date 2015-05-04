@@ -8,7 +8,7 @@ include(../common.pri)
 DEFINES += "PATH_ESPEAK_DATA=\\\"$${DATADIR}\\\""
 DEFINES += USE_PULSEAUDIO
 DEFINES += USE_ASYNC
-# DEFINES += DEBUG_ENABLED
+DEFINES += DEBUG_ENABLED
 
 CONFIG += link_pkgconfig
 PKGCONFIG += libpulse

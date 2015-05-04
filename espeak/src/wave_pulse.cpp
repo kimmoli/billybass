@@ -828,6 +828,15 @@ size_t wave_write(void* theHandler, char* theMono16BitsWaveBuffer, size_t theSiz
 }
 
 //>
+//<wave_force_flush
+
+void wave_force_flush()
+{
+    ENTER("force flush");
+    pa_stream_flush(stream, NULL, NULL);
+}
+
+//>
 //<wave_close
 
 int wave_close(void* theHandler)

@@ -13,6 +13,7 @@ extern void* wave_open(const char* the_api);
 
 extern size_t wave_write(void* theHandler, char* theMono16BitsWaveBuffer, size_t theSize);
 extern int wave_close(void* theHandler);
+extern void wave_force_flush();
 extern void wave_flush(void* theHandler);
 extern int wave_is_busy(void* theHandler);
 extern void wave_terminate();

@@ -35,6 +35,7 @@ public:
 
     void requestSynth(QString message, QString language);
     bool isQueueEmpty() { return _stringToSynth.isEmpty(); }
+    void terminate(bool force = false);
 
 signals:
     void synthRequested();
@@ -47,7 +48,6 @@ public slots:
 private:
     void init();
     void setLanguage(QString language = QString());
-    void terminate();
 
     QString _libespeakVersion;
     bool _espeakInitialized;
