@@ -23,6 +23,8 @@ Espeak::~Espeak()
 
 void Espeak::requestSynth(QString message, QString language)
 {
+    qDebug() << "synth requested" << message;
+
     _stringToSynth.enqueue(message);
     _language = language;
 
@@ -31,30 +33,38 @@ void Espeak::requestSynth(QString message, QString language)
 
 void Espeak::synth()
 {
+    qDebug() << "synth";
+
     if (!_espeakInitialized)
         init();
+
+    /* If flag false, return. Notring to so here. */
+    if (!_espeakInitialized)
+    {
+        qCritical() << "init failure! aborting synth";
+        emit synthComplete();
+        return;
+    }
 
     while (!_stringToSynth.isEmpty())
     {
         QString stringToSynth = _stringToSynth.dequeue();
 
+        qDebug() << "synthesizing:" << stringToSynth;
+
         if (stringToSynth.isEmpty())
         {
-            qDebug() << "not synthesizing empty string";
-            terminate();
-
-            emit synthComplete();
-
-            return;
+            qDebug() << "not synthesizing empty string, queue" << _stringToSynth.count();
+            continue;
         }
-
-        qDebug() << "synth:" << stringToSynth;
 
         espeak_ERROR ret = espeak_Synth(stringToSynth.toLatin1().data(), stringToSynth.length()+1, 0, POS_CHARACTER, 0, _synthFlags, NULL, NULL);
         if (ret != EE_OK)
         {
-            qDebug() << "synth failed" << ret;
+            qCritical() << "synth failed" << ret;
         }
+
+        qDebug() << "synth complete";
     }
 
     terminate();
@@ -108,7 +118,8 @@ void Espeak::setLanguage(QString language)
             lang= "english";
             if (espeak_SetVoiceByName(lang.toLocal8Bit().data()) != EE_OK)
             {
-                qDebug() << "language fallback failed.";
+                qCritical() << "language fallback failed.";
+                _espeakInitialized = false;
                 return;
             }
         }
@@ -117,6 +128,8 @@ void Espeak::setLanguage(QString language)
 
 void Espeak::terminate(bool force)
 {
+    qDebug() << "terminating" << (force ? "(forced)" : "");
+
     if (_espeakInitialized)
     {
         while (espeak_IsPlaying() && !force)
@@ -136,7 +149,7 @@ void Espeak::terminate(bool force)
 
         _espeakInitialized = false;
 
-        qDebug() << "terminated" << (force ? "(forced)" : "");
+        qDebug() << "terminated";
 
         if (force)
             emit synthComplete();

@@ -54,6 +54,8 @@ private slots:
     void heartbeatReceived(int sock);
     void iphbStop();
     void iphbStart();
+    void threadFinished();
+    void threadStarted();
 
 private:
     QString _libespeakVersion;

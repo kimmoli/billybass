@@ -31,7 +31,7 @@ ApplicationWindow
     Espeak
     {
         id: espeak
-        Component.onCompleted: espeak.synth("billy")
+        Component.onCompleted: espeak.synth("")
     }
 
     ListModel

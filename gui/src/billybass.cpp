@@ -54,6 +54,10 @@ BillyBass::BillyBass(QObject *parent) :
     connect(espeak, SIGNAL(synthComplete()), this, SLOT(synthComplete()));
     connect(espeak, SIGNAL(libespeakVersionChanged(QString)), this, SLOT(espeakVersion(QString)));
 
+    /* Debugs */
+    connect(thread, SIGNAL(started()), this, SLOT(threadStarted()));
+    connect(thread, SIGNAL(finished()), this, SLOT(threadFinished()));
+
 }
 
 BillyBass::~BillyBass()
@@ -76,14 +80,27 @@ void BillyBass::espeakVersion(QString ver)
     emit libespeakVersionChanged();
 }
 
-void BillyBass::synthComplete()
+void BillyBass::threadFinished()
 {
-    thread->quit();
-
-    QThread::msleep(100);
+    qDebug() << "thread finished";
 
     if (!espeak->isQueueEmpty())
+    {
+        qDebug() << "queue not empty, requesting to continue by adding empty string to queue";
         espeak->requestSynth(QString(), _language);
+    }
+}
+
+void BillyBass::threadStarted()
+{
+    qDebug() << "thread started";
+}
+
+void BillyBass::synthComplete()
+{
+    qDebug() << "synth complete";
+
+    thread->quit();
 }
 
 /* IPHB stuff */
@@ -92,12 +109,11 @@ void BillyBass::heartbeatReceived(int sock)
 {
     Q_UNUSED(sock);
 
-    qDebug() << "iphb heartbeat";
+    qDebug() << "iphb heartbeat triggering synth" << _lastStringSynth;
+
+    espeak->requestSynth(_lastStringSynth, _language);
 
     iphbStop();
-
-    if (_espeakInitialized)
-        iphbStart();
 }
 
 void BillyBass::iphbStart()
@@ -109,17 +125,17 @@ void BillyBass::iphbStart()
 
     if (!(iphbdHandler && iphbNotifier))
     {
-        qDebug() << "iphbStart iphbHandler not ok";
+        qCritical() << "iphbStart iphbHandler not ok";
         return;
     }
 
     time_t unixTime;
 
-    unixTime = iphb_wait(iphbdHandler, 2, 5 , 0);
+    unixTime = iphb_wait(iphbdHandler, 3, 4 , 0);
 
     if (unixTime == (time_t)-1)
     {
-        qDebug() << "iphbStart timer failed";
+        qCritical() << "iphbStart timer failed";
         return;
     }
 
@@ -136,7 +152,7 @@ void BillyBass::iphbStop()
 
     if (!(iphbdHandler && iphbNotifier))
     {
-        printf("iphbStop iphbHandler not ok\n");
+        qCritical() << "iphbStop iphbHandler not ok";
         return;
     }
 
@@ -147,15 +163,18 @@ void BillyBass::iphbStop()
     iphbRunning = false;
 }
 
+/* STFU */
+
 void BillyBass::writeStfu(bool stfu)
 {
     _stfu = stfu;
+    qDebug() << "stfu" << stfu;
 
     if (_stfu && thread->isRunning())
     {
-        qDebug() << "trying to cancel...";
+        qDebug() << "cancelling current synth";
         espeak_Cancel();
-        espeak->terminate(true);
+        //espeak->terminate(true);
     }
 
     emit stfuChanged();
@@ -165,12 +184,16 @@ void BillyBass::writeStfu(bool stfu)
 
 void BillyBass::synth(QString text)
 {
+    qDebug() << "requesting synth" << text;
+
     espeak->requestSynth(text, _language);
     _lastStringSynth = text;
 }
 
 void BillyBass::setLanguage(QString language)
 {
+    qDebug() << "setting language" << language;
+
     _language = language;
     emit languageChanged();
 }
@@ -179,23 +202,31 @@ void BillyBass::speakNotification(QString message)
 {
     _lastStringSynth = message;
 
-    if (_stfu)
-        return;
+    qDebug() << "notification" << message;
 
-    /* Allow system notification sound to be played */
+    if (_stfu)
+    {
+        qDebug() << "stfu mode enabled, aborting";
+        return;
+    }
+
+    /* if iphb is already running, just add to queue */
+    if (iphbRunning)
+        espeak->requestSynth(_lastStringSynth, _language);
+
     iphbStart();
 
-    struct timespec shorttime;
-    shorttime.tv_sec = 3;
-    shorttime.tv_nsec = 0;
+//    struct timespec shorttime;
+//    shorttime.tv_sec = 3;
+//    shorttime.tv_nsec = 0;
 
-    clock_nanosleep(CLOCK_MONOTONIC, 0, &shorttime, NULL);
-
-    espeak->requestSynth(message, _language);
+//    clock_nanosleep(CLOCK_MONOTONIC, 0, &shorttime, NULL);
 }
 
 void BillyBass::replay()
 {
+    qDebug() << "replay" << _lastStringSynth;
+
     espeak->requestSynth(_lastStringSynth, _language);
 }
 
@@ -211,7 +242,7 @@ QVariantList BillyBass::getVoices()
     int len;
     int count;
     int c;
-    int j;
+    unsigned int j;
     const espeak_VOICE *v;
     const char *lang_name;
     char age_buf[12];
