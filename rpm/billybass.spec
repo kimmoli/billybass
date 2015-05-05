@@ -53,6 +53,7 @@ desktop-file-install --delete-original       \
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}
 %{_datadir}/%{name}
+%{_datadir}/%{name}/lib
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/86x86/apps/%{name}.png
 %config /etc/pulse/xpolicy.conf.d/espeak.conf

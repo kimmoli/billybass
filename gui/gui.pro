@@ -66,7 +66,11 @@ INCLUDEPATH += ../espeak/linux_32bit/shared_library
 espeak_data.files = $$PWD/../espeak/espeak-data/*
 espeak_data.path = $${DATADIR}
 
-lib.files = $$OUT_PWD/../espeak/libespeak.so*
+lib.files += \
+    $$OUT_PWD/../espeak/libespeak.so \
+    $$OUT_PWD/../espeak/libespeak.so.1 \
+    $$OUT_PWD/../espeak/libespeak.so.1.1 \
+    $$OUT_PWD/../espeak/libespeak.so.1.1.48
 lib.path = /usr/share/$${TARGET}/lib
 
 policy.files = $$PWD/config/espeak.conf
