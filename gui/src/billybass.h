@@ -9,6 +9,7 @@
 #include <QVariantList>
 #include <QVariantMap>
 #include "notificationmanager.h"
+#include <contextproperty.h>
 #include "espeak.h"
 
 extern "C"
@@ -56,6 +57,7 @@ private slots:
     void iphbStart();
     void threadFinished();
     void threadStarted();
+    void propertyProfileNameChanged();
 
 private:
     QString _libespeakVersion;
@@ -76,6 +78,9 @@ private:
     QThread *thread;
 
     bool _stfu;
+    bool _firstRun;
+
+    QScopedPointer<ContextProperty> propertyProfileName;
 };
 
 

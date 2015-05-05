@@ -95,10 +95,17 @@ uint NotificationManager::Notify(const QString &app_name, uint replaces_id, cons
     qDebug() << "summary:" << summary << "data:" << data;
     qDebug() << "body:" << body;
 
-    if (body.isEmpty())
+    if (!body.isEmpty())
+        emit this->gotNotification(body);
+    else if (!summary.isEmpty())
         emit this->gotNotification(summary);
     else
-        emit this->gotNotification(body);
+        qDebug() << "ignoring this notification";
+
+//    else if (!data.isEmpty())
+//        emit this->gotNotification(data);
+//    else if (!subject.isEmpty())
+//        emit this->gotNotification(subject);
 
     return 0;
 }

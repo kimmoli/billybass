@@ -4,7 +4,8 @@
 
 TARGET = harbour-billybass
 
-CONFIG += sailfishapp
+CONFIG += sailfishapp link_pkgconfig
+PKGCONFIG += sailfishapp contextkit-statefs
 QT += dbus
 
 include(../common.pri)

@@ -16,6 +16,7 @@ BillyBass::BillyBass(QObject *parent) :
     _synthFlags = espeakCHARS_AUTO | espeakPHONEMES | espeakENDPAUSE;
     _lastStringSynth = QString();
     _stfu = false;
+    _firstRun = true;
 
     notifications = new NotificationManager();
 
@@ -58,6 +59,8 @@ BillyBass::BillyBass(QObject *parent) :
     connect(thread, SIGNAL(started()), this, SLOT(threadStarted()));
     connect(thread, SIGNAL(finished()), this, SLOT(threadFinished()));
 
+    propertyProfileName.reset(new ContextProperty("Profile.Name", this));
+    QObject::connect(propertyProfileName.data(), SIGNAL(valueChanged()), this, SLOT(propertyProfileNameChanged()));
 }
 
 BillyBass::~BillyBass()
@@ -80,9 +83,18 @@ void BillyBass::espeakVersion(QString ver)
     emit libespeakVersionChanged();
 }
 
+void BillyBass::propertyProfileNameChanged()
+{
+    qDebug() << "property Profile.Name changed" << propertyProfileName->value().toString();
+
+    writeStfu(propertyProfileName->value().toString() == "silent");
+}
+
 void BillyBass::threadFinished()
 {
     qDebug() << "thread finished";
+
+    _firstRun = false;
 
     if (!espeak->isQueueEmpty())
     {
@@ -170,7 +182,7 @@ void BillyBass::writeStfu(bool stfu)
     _stfu = stfu;
     qDebug() << "stfu" << stfu;
 
-    if (_stfu && thread->isRunning())
+    if (_stfu && thread->isRunning() && !_firstRun)
     {
         qDebug() << "cancelling current synth";
         espeak_Cancel();
@@ -209,10 +221,6 @@ void BillyBass::speakNotification(QString message)
         qDebug() << "stfu mode enabled, aborting";
         return;
     }
-
-    /* if iphb is already running, just add to queue */
-    if (iphbRunning)
-        espeak->requestSynth(_lastStringSynth, _language);
 
     iphbStart();
 

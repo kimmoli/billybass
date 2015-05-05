@@ -12,7 +12,7 @@ Name:       harbour-billybass
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    Billy Bass
-Version:    0.0.7
+Version:    0.0.8
 Release:    1
 Group:      Qt/Qt
 License:    LICENSE
@@ -26,6 +26,7 @@ BuildRequires:  pkgconfig(Qt5DBus)
 BuildRequires:  pkgconfig(sailfishapp) >= 0.0.10
 BuildRequires:  pkgconfig(libpulse)
 BuildRequires:  pkgconfig(libiphb)
+BuildRequires:  pkgconfig(contextkit-statefs)
 BuildRequires:  desktop-file-utils
 
 %description
