@@ -33,7 +33,7 @@ public:
     void replay();
     QVariantList getVoices();
 
-    void requestSynth(QString message, QString language);
+    void requestSynth(QString message, QString language, bool boost);
     bool isQueueEmpty() { return _stringToSynth.isEmpty(); }
     void terminate(bool force = false);
 
@@ -56,6 +56,7 @@ private:
     QString _language;
     int _synthFlags;
     QQueue<QString> _stringToSynth;
+    int _volume;
 
 };
 

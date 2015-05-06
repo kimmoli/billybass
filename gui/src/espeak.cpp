@@ -12,6 +12,7 @@ Espeak::Espeak(QObject *parent) :
     _libespeakVersion = QString();
     _stringToSynth.clear();
     _espeakInitialized = false;
+    _volume = 100;
     _language = QString();
     _synthFlags = espeakCHARS_AUTO | espeakPHONEMES | espeakENDPAUSE;
 }
@@ -21,12 +22,13 @@ Espeak::~Espeak()
     terminate();
 }
 
-void Espeak::requestSynth(QString message, QString language)
+void Espeak::requestSynth(QString message, QString language, bool boost)
 {
     qDebug() << "synth requested" << message;
 
     _stringToSynth.enqueue(message);
     _language = language;
+    _volume = boost ? 200 : 100;
 
     emit synthRequested();
 }
@@ -95,6 +97,8 @@ void Espeak::init()
         _libespeakVersion = QString(version);
         emit libespeakVersionChanged(_libespeakVersion);
     }
+
+    espeak_SetParameter(espeakVOLUME, _volume, 0);
 
     _espeakInitialized = true;
 

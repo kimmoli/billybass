@@ -24,6 +24,7 @@ class BillyBass : public QObject
     Q_PROPERTY(QString libespeakVersion READ readLibespeakVersion NOTIFY libespeakVersionChanged())
     Q_PROPERTY(QString language READ readLanguage NOTIFY languageChanged())
     Q_PROPERTY(bool stfu READ readStfu WRITE writeStfu NOTIFY stfuChanged())
+    Q_PROPERTY(bool boost READ readBoost WRITE writeBoost NOTIFY boostChanged())
 
 public:
     explicit BillyBass(QObject *parent = 0);
@@ -36,15 +37,20 @@ public:
     Q_INVOKABLE void setLanguage(QString language = QString());
     Q_INVOKABLE void replay();
     Q_INVOKABLE QVariantList getVoices();
+    Q_INVOKABLE void setVariant(QString variant);
 
     bool readStfu() { return _stfu; }
+    bool readBoost() { return _boost; }
+
     void writeStfu(bool stfu);
+    void writeBoost(bool boost);
 
 signals:
     void versionChanged();
     void libespeakVersionChanged();
     void languageChanged();
     void stfuChanged();
+    void boostChanged();
 
 public slots:
     void espeakVersion(QString ver);
@@ -79,6 +85,7 @@ private:
     QThread *thread;
 
     bool _stfu;
+    bool _boost;
     bool _firstRun;
 
     QScopedPointer<ContextProperty> propertyProfileName;

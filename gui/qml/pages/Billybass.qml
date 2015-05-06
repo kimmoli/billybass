@@ -45,6 +45,7 @@ Page
                     dialog.accepted.connect(function()
                     {
                         espeak.setLanguage(dialog.newLanguage)
+                        voiceVariant.value = 0
                     })
                 }
             }
@@ -82,6 +83,37 @@ Page
                 EnterKey.iconSource: "image://theme/icon-m-enter-accept"
                 EnterKey.onClicked: espeak.synth(text)
             }
+
+            Slider
+            {
+                id: voiceVariant
+                value: 0
+                minimumValue: -5
+                maximumValue: 5
+                stepSize: 1
+                width: parent.width - 2*Theme.paddingLarge
+                anchors.horizontalCenter: parent.horizontalCenter
+                valueText: variantName(value)
+
+                onValueChanged: espeak.setVariant(variantName(value))
+
+                function variantName(val)
+                {
+                    if (val < 1)
+                        return "m" + (-1*val)
+                    else
+                        return "f" + val
+                }
+            }
+
+            TextSwitch
+            {
+                x: Theme.paddingLarge
+                text: "Audio boost"
+                checked: espeak.boost
+                onCheckedChanged: espeak.boost = !espeak.boost
+            }
+
         }
     }
 

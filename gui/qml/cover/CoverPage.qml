@@ -11,6 +11,7 @@ CoverBackground
     {
         text: "Billy Bass"
         icon.source: "/usr/share/icons/hicolor/86x86/apps/harbour-billybass.png"
+        icon.opacity: 0.6
     }
 
     CoverActionList

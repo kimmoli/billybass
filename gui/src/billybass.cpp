@@ -16,6 +16,7 @@ BillyBass::BillyBass(QObject *parent) :
     _synthFlags = espeakCHARS_AUTO | espeakPHONEMES | espeakENDPAUSE;
     _lastStringSynth = QString();
     _stfu = false;
+    _boost = false;
     _firstRun = true;
 
     notifications = new NotificationManager();
@@ -100,7 +101,7 @@ void BillyBass::threadFinished()
     if (!espeak->isQueueEmpty())
     {
         qDebug() << "queue not empty, requesting to continue by adding empty string to queue";
-        espeak->requestSynth(QString(), _language);
+        espeak->requestSynth(QString(), _language, _boost);
     }
 }
 
@@ -124,7 +125,7 @@ void BillyBass::heartbeatReceived(int sock)
 
     qDebug() << "iphb heartbeat triggering synth" << _lastStringSynth;
 
-    espeak->requestSynth(_lastStringSynth, _language);
+    espeak->requestSynth(_lastStringSynth, _language, _boost);
 
     iphbStop();
 }
@@ -193,13 +194,20 @@ void BillyBass::writeStfu(bool stfu)
     emit stfuChanged();
 }
 
+void BillyBass::writeBoost(bool boost)
+{
+    _boost = boost;
+
+    emit boostChanged();
+}
+
 /* ESPEAK stuff */
 
 void BillyBass::synth(QString text)
 {
     qDebug() << "requesting synth" << text;
 
-    espeak->requestSynth(text, _language);
+    espeak->requestSynth(text, _language, _boost);
     _lastStringSynth = text;
 }
 
@@ -230,19 +238,13 @@ void BillyBass::speakNotification(QString message)
     }
 
     iphbStart();
-
-//    struct timespec shorttime;
-//    shorttime.tv_sec = 3;
-//    shorttime.tv_nsec = 0;
-
-//    clock_nanosleep(CLOCK_MONOTONIC, 0, &shorttime, NULL);
 }
 
 void BillyBass::replay()
 {
     qDebug() << "replay" << _lastStringSynth;
 
-    espeak->requestSynth(_lastStringSynth, _language);
+    espeak->requestSynth(_lastStringSynth, _language, _boost);
 }
 
 QVariantList BillyBass::getVoices()
@@ -313,4 +315,15 @@ QVariantList BillyBass::getVoices()
         qDebug() << QString(f_out);
     }
     return tmp;
+}
+
+void BillyBass::setVariant(QString variant)
+{
+    _language = _language.split("+").at(0);
+    _language.append("+");
+    _language.append(variant);
+
+    qDebug() << "language is" << _language;
+
+    emit languageChanged();
 }
