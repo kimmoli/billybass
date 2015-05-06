@@ -36,7 +36,7 @@ Dialog
             Label
             {
                 x: Theme.paddingLarge
-                text: voicename
+                text: voicename + "  (" + language + ")"
                 anchors.verticalCenter: parent.verticalCenter
                 font.capitalization: Font.Capitalize
                 color: listItem.highlighted ? Theme.highlightColor : Theme.primaryColor

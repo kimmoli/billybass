@@ -54,6 +54,7 @@ BillyBass::BillyBass(QObject *parent) :
     connect(thread, SIGNAL(started()), espeak, SLOT(synth()));
     connect(espeak, SIGNAL(synthComplete()), this, SLOT(synthComplete()));
     connect(espeak, SIGNAL(libespeakVersionChanged(QString)), this, SLOT(espeakVersion(QString)));
+    connect(espeak, SIGNAL(languageChanged(QString)), this, SLOT(changeLanguage(QString)));
 
     /* Debugs */
     connect(thread, SIGNAL(started()), this, SLOT(threadStarted()));
@@ -206,6 +207,12 @@ void BillyBass::setLanguage(QString language)
 {
     qDebug() << "setting language" << language;
 
+    _language = language;
+    emit languageChanged();
+}
+
+void BillyBass::changeLanguage(QString language)
+{
     _language = language;
     emit languageChanged();
 }

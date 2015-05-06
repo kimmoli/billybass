@@ -106,7 +106,7 @@ void Espeak::setLanguage(QString language)
     QString lang = language;
 
     if (lang.isEmpty())
-        lang = QLocale::system().name().split('_').at(0);
+        lang = QLocale::languageToString(QLocale::system().language());
 
     qDebug() << "setting language to" << lang;
 
@@ -115,7 +115,7 @@ void Espeak::setLanguage(QString language)
         if (espeak_SetVoiceByName(lang.toLocal8Bit().data()) != EE_OK)
         {
             qDebug() << "language set failed, fallback to english";
-            lang= "english";
+            lang = "english";
             if (espeak_SetVoiceByName(lang.toLocal8Bit().data()) != EE_OK)
             {
                 qCritical() << "language fallback failed.";
@@ -124,6 +124,8 @@ void Espeak::setLanguage(QString language)
             }
         }
     }
+
+    emit languageChanged(lang);
 }
 
 void Espeak::terminate(bool force)

@@ -49,6 +49,7 @@ signals:
 public slots:
     void espeakVersion(QString ver);
     void synthComplete();
+    void changeLanguage(QString language);
 
 private slots:
     void speakNotification(QString message);

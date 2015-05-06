@@ -41,6 +41,7 @@ signals:
     void synthRequested();
     void synthComplete();
     void libespeakVersionChanged(QString ver);
+    void languageChanged(QString language);
 
 public slots:
     void synth();
