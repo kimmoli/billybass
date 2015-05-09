@@ -130,6 +130,8 @@ void BillyBass::heartbeatReceived(int sock)
 
     qDebug() << "iphb heartbeat triggering synth" << _iphbMessage;
 
+    _lastStringSynth = _iphbMessage;
+
     espeak->requestSynth(_iphbMessage, _language, _boost);
 
     iphbStop();
