@@ -430,16 +430,6 @@ static void pulse_write(void* ptr, long length)
 {
   ENTER(__FUNCTION__);
 
-#if DEBUG_ENABLED
-  FILE *f;
-  f = fopen("/tmp/pulsewrite.dat", "ab");
-  fwrite(ptr, length, 1, f);
-  fclose(f);
-  SHOW("pulse_write > wrote to file (%d)\n", length);
-#endif
-
-
-
   SHOW("pulse_write > length=%ld\n", length);
 
     CHECK_CONNECTED_NO_RETVAL();
@@ -768,7 +758,7 @@ size_t wave_write(void* theHandler, char* theMono16BitsWaveBuffer, size_t theSiz
   size_t bytes_to_write = theSize;
   char* aBuffer=theMono16BitsWaveBuffer;
 
-#if DEBUG_ENABLED
+#if DEBUG_ENABLED_WAVE
   FILE *f;
   f = fopen("/tmp/espeak.dat", "ab");
   fwrite(aBuffer, bytes_to_write, 1, f);
