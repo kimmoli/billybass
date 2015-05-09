@@ -20,6 +20,7 @@ BillyBass::BillyBass(QObject *parent) :
     _boost = false;
     _firstRun = true;
     _variant = QString();
+    _autolanguage = false;
 
     notifications = new NotificationManager();
 
@@ -204,6 +205,8 @@ void BillyBass::writeBoost(bool boost)
 {
     _boost = boost;
 
+    qDebug() << "audio boost" << boost;
+
     emit boostChanged();
 }
 
@@ -213,10 +216,13 @@ void BillyBass::synth(QString text)
 {
     qDebug() << "requesting synth" << text;
 
-    QString detectedLanguage = languagedetector->detectLanguage(text);
+    if (_autolanguage)
+    {
+        QString detectedLanguage = languagedetector->detectLanguage(text);
 
-    if (detectedLanguage != "unknown")
-        setLanguage(QString("%1%2").arg(detectedLanguage).arg(_variant));
+        if (detectedLanguage != "unknown")
+            setLanguage(QString("%1%2").arg(detectedLanguage).arg(_variant));
+    }
 
     espeak->requestSynth(text, _language, _boost);
     _lastStringSynth = text;
@@ -238,10 +244,13 @@ void BillyBass::changeLanguage(QString language)
 
 void BillyBass::speakNotification(QString message)
 {
-    QString detectedLanguage = languagedetector->detectLanguage(message);
+    if (_autolanguage)
+    {
+        QString detectedLanguage = languagedetector->detectLanguage(message);
 
-    if (detectedLanguage != "unknown")
-        setLanguage(QString("%1%2").arg(detectedLanguage).arg(_variant));
+        if (detectedLanguage != "unknown")
+            setLanguage(QString("%1%2").arg(detectedLanguage).arg(_variant));
+    }
 
     qDebug() << "notification" << message;
 
@@ -340,4 +349,13 @@ void BillyBass::setVariant(QString variant)
     qDebug() << "language is" << _language;
 
     emit languageChanged();
+}
+
+void BillyBass::writeAutolanguage(bool autolanguage)
+{
+    _autolanguage = autolanguage;
+
+    qDebug() << "automatic lanugage detection" << autolanguage;
+
+    emit autolanguageChanged();
 }

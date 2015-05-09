@@ -113,6 +113,13 @@ Page
                 checked: espeak.boost
                 onCheckedChanged: espeak.boost = !espeak.boost
             }
+            TextSwitch
+            {
+                x: Theme.paddingLarge
+                text: "Automatic language detect"
+                checked: espeak.autolanguage
+                onCheckedChanged: espeak.autolanguage = !espeak.autolanguage
+            }
 
         }
     }

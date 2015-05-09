@@ -26,6 +26,7 @@ class BillyBass : public QObject
     Q_PROPERTY(QString language READ readLanguage NOTIFY languageChanged())
     Q_PROPERTY(bool stfu READ readStfu WRITE writeStfu NOTIFY stfuChanged())
     Q_PROPERTY(bool boost READ readBoost WRITE writeBoost NOTIFY boostChanged())
+    Q_PROPERTY(bool autolanguage READ readAutolanguage WRITE writeAutolanguage NOTIFY autolanguageChanged())
 
 public:
     explicit BillyBass(QObject *parent = 0);
@@ -42,9 +43,11 @@ public:
 
     bool readStfu() { return _stfu; }
     bool readBoost() { return _boost; }
+    bool readAutolanguage() { return _autolanguage; }
 
     void writeStfu(bool stfu);
     void writeBoost(bool boost);
+    void writeAutolanguage(bool autolanguage);
 
 signals:
     void versionChanged();
@@ -52,6 +55,7 @@ signals:
     void languageChanged();
     void stfuChanged();
     void boostChanged();
+    void autolanguageChanged();
 
 public slots:
     void espeakVersion(QString ver);
@@ -76,6 +80,7 @@ private:
     QString _lastStringSynth;
     QString _variant;
     QString _iphbMessage;
+    bool _autolanguage;
 
     NotificationManager *notifications;
 
