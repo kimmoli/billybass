@@ -14,7 +14,7 @@ Espeak::Espeak(QObject *parent) :
     _espeakInitialized = false;
     _volume = 100;
     _language = QString();
-    _synthFlags = espeakCHARS_UTF8 | espeakPHONEMES | espeakENDPAUSE;
+    _synthFlags = espeakCHARS_16BIT | espeakPHONEMES | espeakENDPAUSE;
 }
 
 Espeak::~Espeak()
@@ -60,7 +60,7 @@ void Espeak::synth()
             continue;
         }
 
-        espeak_ERROR ret = espeak_Synth(stringToSynth.toUtf8().data(), stringToSynth.length()+1, 0, POS_CHARACTER, 0, _synthFlags, NULL, NULL);
+        espeak_ERROR ret = espeak_Synth(stringToSynth.utf16(), (stringToSynth.length()*2)+1, 0, POS_CHARACTER, 0, _synthFlags, NULL, NULL);
         if (ret != EE_OK)
         {
             qCritical() << "synth failed" << ret;
