@@ -3,6 +3,7 @@
 */
 
 #include "billybass.h"
+#include <sailfishapp.h>
 #include <QDebug>
 #include <QThread>
 
@@ -18,6 +19,7 @@ BillyBass::BillyBass(QObject *parent) :
     _stfu = false;
     _boost = false;
     _firstRun = true;
+    _variant = QString();
 
     notifications = new NotificationManager();
 
@@ -63,6 +65,8 @@ BillyBass::BillyBass(QObject *parent) :
 
     propertyProfileName.reset(new ContextProperty("Profile.Name", this));
     QObject::connect(propertyProfileName.data(), SIGNAL(valueChanged()), this, SLOT(propertyProfileNameChanged()));
+
+    languagedetector = new LanguageDetector(SailfishApp::pathTo("langdata").toLocalFile());
 }
 
 BillyBass::~BillyBass()
@@ -123,19 +127,21 @@ void BillyBass::heartbeatReceived(int sock)
 {
     Q_UNUSED(sock);
 
-    qDebug() << "iphb heartbeat triggering synth" << _lastStringSynth;
+    qDebug() << "iphb heartbeat triggering synth" << _iphbMessage;
 
-    espeak->requestSynth(_lastStringSynth, _language, _boost);
+    espeak->requestSynth(_iphbMessage, _language, _boost);
 
     iphbStop();
 }
 
-void BillyBass::iphbStart()
+void BillyBass::iphbStart(QString message)
 {
     if (iphbRunning)
         return;
 
     qDebug() << "iphb start";
+
+    _iphbMessage = message;
 
     if (!(iphbdHandler && iphbNotifier))
     {
@@ -207,6 +213,11 @@ void BillyBass::synth(QString text)
 {
     qDebug() << "requesting synth" << text;
 
+    QString detectedLanguage = languagedetector->detectLanguage(text);
+
+    if (detectedLanguage != "unknown")
+        setLanguage(QString("%1%2").arg(detectedLanguage).arg(_variant));
+
     espeak->requestSynth(text, _language, _boost);
     _lastStringSynth = text;
 }
@@ -227,7 +238,10 @@ void BillyBass::changeLanguage(QString language)
 
 void BillyBass::speakNotification(QString message)
 {
-    _lastStringSynth = message;
+    QString detectedLanguage = languagedetector->detectLanguage(message);
+
+    if (detectedLanguage != "unknown")
+        setLanguage(QString("%1%2").arg(detectedLanguage).arg(_variant));
 
     qDebug() << "notification" << message;
 
@@ -237,7 +251,7 @@ void BillyBass::speakNotification(QString message)
         return;
     }
 
-    iphbStart();
+    iphbStart(message);
 }
 
 void BillyBass::replay()
@@ -319,9 +333,9 @@ QVariantList BillyBass::getVoices()
 
 void BillyBass::setVariant(QString variant)
 {
+    _variant = QString("+%1").arg(variant);
     _language = _language.split("+").at(0);
-    _language.append("+");
-    _language.append(variant);
+    _language.append(_variant);
 
     qDebug() << "language is" << _language;
 

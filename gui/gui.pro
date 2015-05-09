@@ -33,7 +33,12 @@ OTHER_FILES += \
     harbour-billybass.png \
     harbour-billybass.desktop \
     config\espeak.conf \
-    qml/pages/LanguageSelector.qml
+    qml/pages/LanguageSelector.qml \
+    langdata/dutch \
+    langdata/french \
+    langdata/german \
+    langdata/italian \
+    langdata/spanish
 
 # iphb stuff
 
@@ -80,3 +85,23 @@ policy.path = /etc/pulse/xpolicy.conf.d
 INSTALLS += lib espeak_data policy
 
 # end of espeak sutff
+
+# language detection
+
+SOURCES += \
+    src/languagedectector.cpp \
+    src/training_text_map.cpp
+
+HEADERS += \
+    src/languagedectector.h \
+    src/training_text_map.h
+
+OTHER_FILES += \
+    langdata/english \
+    langdata/finnish
+
+langdata.files = $$PWD/langdata/*
+langdata.path = /usr/share/$${TARGET}/langdata
+
+INSTALLS += langdata
+

@@ -11,6 +11,7 @@
 #include "notificationmanager.h"
 #include <contextproperty.h>
 #include "espeak.h"
+#include "languagedectector.h"
 
 extern "C"
 {
@@ -61,7 +62,7 @@ private slots:
     void speakNotification(QString message);
     void heartbeatReceived(int sock);
     void iphbStop();
-    void iphbStart();
+    void iphbStart(QString message);
     void threadFinished();
     void threadStarted();
     void propertyProfileNameChanged();
@@ -73,6 +74,8 @@ private:
     QString _language;
     int _synthFlags;
     QString _lastStringSynth;
+    QString _variant;
+    QString _iphbMessage;
 
     NotificationManager *notifications;
 
@@ -89,6 +92,8 @@ private:
     bool _firstRun;
 
     QScopedPointer<ContextProperty> propertyProfileName;
+
+    LanguageDetector *languagedetector;
 };
 
 
